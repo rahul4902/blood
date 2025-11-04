@@ -1,90 +1,112 @@
+// middleware.js
 import { NextResponse } from 'next/server';
 
-export async function middleware(request) {
-  const accessToken = request.cookies.get('accessToken')?.value;
-  const { pathname } = request.nextUrl;
+/**
+ * Helper: Unified logging for dev and prod (Vercel captures console.log in production)
+ */
+const log = (...args) => {
+  const prefix = process.env.NODE_ENV === 'development' ? '[DEV MIDDLEWARE]' : '[PROD MIDDLEWARE]';
+  console.log(prefix, ...args);
+};
 
-  // Define protected and public routes
+/**
+ * Manual cookie parser fallback (in case request.cookies fails in Edge)
+ */
+const parseCookies = (header) => {
+  const parsed = {};
+  if (!header) return parsed;
+  header.split(';').forEach((pair) => {
+    const [key, ...rest] = pair.trim().split('=');
+    if (key) {
+      parsed[key] = decodeURIComponent(rest.join('='));
+    }
+  });
+  return parsed;
+};
+
+export async function middleware(request) {
+  const { pathname } = request.nextUrl;
+  const cookieHeader = request.headers.get('cookie') || '';
+
+  // Parse cookies via Next.js + fallback
+  const cookies = request.cookies;
+  const manualCookies = parseCookies(cookieHeader);
+
+  const accessToken = cookies.get('accessToken')?.value || manualCookies['accessToken'];
+  const tokenExpiry = cookies.get('tokenExpiry')?.value || manualCookies['tokenExpiry'];
+
+  // === LOGGING (Visible in Vercel Dashboard) ===
+  log('Path:', pathname);
+  log('Raw Cookie Header:', cookieHeader);
+  log('accessToken exists:', !!accessToken);
+  log('tokenExpiry exists:', !!tokenExpiry);
+
+  // === ROUTE DEFINITIONS ===
   const protectedPaths = [
     '/delivery-address',
     '/checkout',
     '/time-slot',
     '/patient-details',
     '/profile',
-    '/orders'
+    '/orders',
   ];
 
   const authPaths = ['/login', '/register'];
 
-  // Check if current path matches protected routes
-  const isProtectedPath = protectedPaths.some(path =>
-    pathname.startsWith(path)
-  );
+  const isProtectedPath = protectedPaths.some((path) => pathname.startsWith(path));
+  const isAuthPath = authPaths.some((path) => pathname.startsWith(path));
 
-  const isAuthPath = authPaths.some(path =>
-    pathname.startsWith(path)
-  );
-  console.log('isProtectedPath', isProtectedPath, accessToken);
-  // Redirect to login if accessing protected route without token
+  log('isProtectedPath:', isProtectedPath);
+  log('isAuthPath:', isAuthPath);
+
+  // === 1. Protected route without token → Login ===
   if (isProtectedPath && !accessToken) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
-    console.log(`[Middleware] Redirecting to login. Original path: ${pathname}`);
+    log('Redirecting to login (no token):', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect to home if authenticated user tries to access auth pages
+  // === 2. Logged in user on login/register → Home ===
   if (isAuthPath && accessToken) {
-    console.log(`[Middleware] User authenticated, redirecting from ${pathname} to home`);
+    log('Redirecting authenticated user from:', pathname, '→ /');
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // For protected routes with token, perform lightweight validation
-  // Only check token expiry from cookie, don't make API calls for performance
-  if (isProtectedPath && accessToken) {
+  // === 3. Token expiry check (only on protected paths) ===
+  if (isProtectedPath && accessToken && tokenExpiry) {
     try {
-      const tokenExpiry = request.cookies.get('tokenExpiry')?.value;
+      const expiryDate = new Date(tokenExpiry);
+      const now = new Date();
 
-      if (tokenExpiry) {
-        const expiryDate = new Date(tokenExpiry);
-        const now = new Date();
+      if (expiryDate <= now) {
+        log('Token expired, clearing cookies and redirecting to login');
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
 
-        // If token is expired, redirect to login
-        if (expiryDate <= now) {
-          console.log(`[Middleware] Token expired, redirecting to login`);
-          const loginUrl = new URL('/login', request.url);
-          loginUrl.searchParams.set('redirect', pathname);
-          const response = NextResponse.redirect(loginUrl);
+        const response = NextResponse.redirect(loginUrl);
 
-          // Clear expired cookies
-          response.cookies.delete('accessToken');
-          response.cookies.delete('tokenExpiry');
-          response.cookies.delete('user');
+        // Clear cookies with explicit path
+        response.cookies.delete('accessToken', { path: '/' });
+        response.cookies.delete('tokenExpiry', { path: '/' });
+        response.cookies.delete('user', { path: '/' });
 
-          return response;
-        }
+        return response;
       }
     } catch (error) {
-      console.error('[Middleware] Token validation error:', error);
-      // On error, allow request to proceed - let client handle it
+      console.error('[Middleware] Token expiry parse error:', error);
+      // Let client handle malformed date
     }
   }
 
-  // Allow the request to proceed
+  // === 4. Allow request ===
+  log('Request allowed:', pathname);
   return NextResponse.next();
 }
 
-// Configure which routes middleware should run on
+// === CONFIG: Run on all pages except API, static, images, public files ===
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.svg$|.*\\.gif$).*)',
-  ]
+    '/((?!api|_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico)$).*)',
+  ],
 };
