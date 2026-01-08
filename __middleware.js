@@ -48,7 +48,7 @@ export async function middleware(request) {
     '/time-slot',
     '/patient-details',
     '/profile',
-    '/orders',
+    '/bookings',
   ];
 
   const authPaths = ['/login', '/register'];

@@ -5,8 +5,10 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
-import { CartProvider } from "@/context/CartContext"
-import { AuthProvider } from "@/context/AuthContext"
+import { CartProvider } from "@/contexts/CartContext"
+import { AuthProvider } from "@/contexts/AuthContext"
+
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -25,6 +27,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <CartProvider>
             <AuthProvider>{children}</AuthProvider>
+            <Toaster />
           </CartProvider>
         </Suspense>
         <Analytics />

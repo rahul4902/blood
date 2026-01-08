@@ -26,7 +26,7 @@ export default function HomePage() {
     { id: 1, title: "Upload Prescription", icon: "📄", color: "bg-blue-100", href: "/upload-prescription" },
     { id: 2, title: "Book Home Visit", icon: "🏠", color: "bg-green-100", href: "/home-visit" },
     { id: 3, title: "View Reports", icon: "📊", color: "bg-purple-100", href: "/reports" },
-    { id: 4, title: "Track Order", icon: "📦", color: "bg-orange-100", href: "/orders" },
+    { id: 4, title: "Track Booking", icon: "📦", color: "bg-orange-100", href: "/bookings" },
   ]
 
   // Fetch all data on component mount
@@ -302,18 +302,17 @@ export default function HomePage() {
             </div>
             <div className="space-y-2">
               {featuredTests.map((test) => (
-                <Link key={test.id} href={`/test?slug=${test.slug}`}>
+                // <Link key={test.id} href={`/test?slug=${test.slug}`}>
+                <div key={test.id}>
                   <CommonCard
+                    cartText='Add'
+                    link={`/test?slug=${test.slug}`}
                     item={test}
                     alsoKnownAs={true}
                     showAddToCart={true}
-                    onAddToCart={async (item) => {
-                      // Your add to cart logic here (e.g., API call or local state update)
-                      console.log("Adding to cart:", item)
-                      await new Promise(res => setTimeout(res, 1000)) // simulate delay
-                    }}
                   />
-                </Link>
+                </div>
+                // </Link>
               ))}
             </div>
           </div>
@@ -330,18 +329,15 @@ export default function HomePage() {
             </div>
             <div className="space-y-2">
               {popularTests.map((test) => (
-                <Link key={test.id} href={`/test?slug=${test.slug}`}>
-                  <CommonCard
+                <div key={test.id}>
+                  <CommonCard                    
+                    cartText='Add'
+                    link={`/test?slug=${test.slug}`}
                     item={test}
                     alsoKnownAs={true}
                     showAddToCart={true}
-                    onAddToCart={async (item) => {
-                      // Your add to cart logic here (e.g., API call or local state update)
-                      console.log("Adding to cart:", item)
-                      await new Promise(res => setTimeout(res, 1000)) // simulate delay
-                    }}
                   />
-                </Link>
+                </div>
               ))}
             </div>
           </div>

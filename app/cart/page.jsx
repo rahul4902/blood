@@ -6,7 +6,7 @@ import MobileNav from "@/components/mobile-nav"
 import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/contexts/CartContext"
 import { Trash2, ShoppingBag, Tag, Loader2, Percent, Gift } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -198,7 +198,7 @@ export default function CartPage() {
                       You are saving ₹{discount.toFixed(2)}
                     </p>
                     <p className="text-xs text-green-700">
-                      on this order!
+                      on this booking!
                     </p>
                   </div>
                 </div>

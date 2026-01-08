@@ -4,7 +4,7 @@ import { Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/contexts/AuthContext"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
@@ -287,7 +287,7 @@ function SidebarContent({
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                 />
               </svg>
-              <span className="font-medium">My Orders</span>
+              <span className="font-medium">My Bookings</span>
             </Link>
             <Link
               href="/reports"

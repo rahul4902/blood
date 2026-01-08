@@ -147,7 +147,7 @@ export default function ChatPage() {
     }
   }, [displayedMessages.length, userIsScrolling])
 
-  const quickReplies = ["Book a test", "View packages", "Track order", "Home visit"]
+  const quickReplies = ["Book a test", "View packages", "Track booking", "Home visit"]
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0]

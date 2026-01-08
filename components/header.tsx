@@ -59,7 +59,7 @@ export function Header() {
             </span>
             <Link href="/offers">
               <Button className="ml-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 text-sm rounded-full">
-                Order Now
+                Book Now
               </Button>
             </Link>
           </div>

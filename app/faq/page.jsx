@@ -17,7 +17,7 @@ const faqs = [
       {
         question: "Is home sample collection free?",
         answer:
-          "Yes, we offer free home sample collection for all orders. Our trained phlebotomists will visit your address at your chosen time slot.",
+          "Yes, we offer free home sample collection for all bookings. Our trained phlebotomists will visit your address at your chosen time slot.",
       },
       {
         question: "How long does it take to get reports?",
@@ -57,7 +57,7 @@ const faqs = [
       {
         question: "Can I reschedule my appointment?",
         answer:
-          "Yes, you can reschedule your appointment up to 2 hours before the scheduled time. Go to your orders and select the reschedule option.",
+          "Yes, you can reschedule your appointment up to 2 hours before the scheduled time. Go to your bookings and select the reschedule option.",
       },
       {
         question: "What if I'm not available during collection?",

@@ -1,9 +1,10 @@
+// app/admin/(auth)/login/page.jsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,11 +25,10 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
-import { baseURL } from "@/lib/utils";
-
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { login } = useAdminAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -38,8 +38,9 @@ export default function AdminLoginPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user types
+    if (error) setError(null);
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,64 +48,21 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      const response = await fetch(baseURL + "auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const result = await login(formData);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Login failed");
+      if (result.success) {
+        console.log('✅ Redirecting to admin dashboard...');
+        router.push("/admin");
+      } else {
+        throw new Error(result.error || "Login failed");
       }
-
-      const data = await response.json();
-
     } catch (err) {
+      console.error('❌ Login error:', err);
       setError(err.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
   };
-
-  // const [formData, setFormData] = useState({
-  //   email: "",
-  //   password: "",
-  // });
-  // const [showPassword, setShowPassword] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [error, setError] = useState("");
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setIsLoading(true);
-  //   setError("");
-
-  //   try {
-  //     const response = await axios.post(`${baseURL}auth/login`, formData);
-  //     const { token, role, permissions, email, firstName, lastName, fullName } = response.data.data;
-  //     dispatch(loginSuccess({ token, role, permissions, email, firstName, lastName, fullName }));
-  //     router.push("/admin");
-  //     alert('in');
-  //   } catch (err) {
-  //     if (axios.isAxiosError(err) && err.response) {
-  //       setError(err.response.data.message || "Invalid email or password.");
-  //     } else {
-  //       setError("An unexpected error occurred.");
-  //     }
-  //     console.log('error', err);
-
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // const handleChange = (e) => {
-  //   setFormData({
-  //     ...formData,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
 
   return (
     <Card className="w-full shadow-2xl border-0 bg-white/95 backdrop-blur">
@@ -127,8 +85,6 @@ export default function AdminLoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-
           <div className="space-y-2">
             <Label htmlFor="email" className="text-gray-700">
               Admin Email
@@ -139,10 +95,11 @@ export default function AdminLoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter admin email"
+                placeholder="admin@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 className="pl-10 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                disabled={isLoading}
                 required
               />
             </div>
@@ -158,16 +115,19 @@ export default function AdminLoginPage() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter password"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 className="pl-10 pr-10 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                disabled={isLoading}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+                disabled={isLoading}
+                tabIndex={-1}
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -184,14 +144,16 @@ export default function AdminLoginPage() {
                 id="remember"
                 type="checkbox"
                 className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                disabled={isLoading}
               />
-              <Label htmlFor="remember" className="text-sm text-gray-600">
+              <Label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
                 Keep me signed in
               </Label>
             </div>
             <Link
               href="/admin/auth/forgot-password"
               className="text-sm text-orange-600 hover:text-orange-500"
+              tabIndex={isLoading ? -1 : 0}
             >
               Forgot password?
             </Link>
@@ -217,7 +179,11 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="text-center text-sm">
-          <Link href="/" className="text-gray-600 hover:text-gray-500">
+          <Link 
+            href="/" 
+            className="text-gray-600 hover:text-gray-500"
+            tabIndex={isLoading ? -1 : 0}
+          >
             ← Back to Main Site
           </Link>
         </div>

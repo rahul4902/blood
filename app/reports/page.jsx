@@ -1,5 +1,6 @@
 import MobileHeader from "@/components/mobile-header"
 import MobileNav from "@/components/mobile-nav"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FileText, Download, Share2, Eye } from "lucide-react"
@@ -9,7 +10,7 @@ export default function ReportsPage() {
   const reports = [
     {
       id: 1,
-      orderId: "12345",
+      bookingId: "12345",
       name: "Complete Health Checkup",
       date: "15 Jan 2025",
       status: "normal",
@@ -17,7 +18,7 @@ export default function ReportsPage() {
     },
     {
       id: 2,
-      orderId: "12343",
+      bookingId: "12343",
       name: "HbA1c Test",
       date: "05 Jan 2025",
       status: "normal",
@@ -25,7 +26,7 @@ export default function ReportsPage() {
     },
     {
       id: 3,
-      orderId: "12340",
+      bookingId: "12340",
       name: "Thyroid Profile",
       date: "28 Dec 2024",
       status: "abnormal",
@@ -35,13 +36,10 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* <MobileHeader userName="Leslie" /> */}
-      
-
+      <PageHeader title="My Reports" />
 
       <main className="max-w-md mx-auto">
         <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">Test Reports</h2>
 
           <div className="space-y-3">
             {reports.map((report) => (
@@ -53,7 +51,7 @@ export default function ReportsPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-sm mb-1">{report.name}</h4>
-                      <p className="text-xs text-muted-foreground mb-1">Order #{report.orderId}</p>
+                      <p className="text-xs text-muted-foreground mb-1">Booking #{report.orderId}</p>
                       <p className="text-xs text-muted-foreground">{report.date}</p>
                     </div>
                     <div>
@@ -85,15 +83,6 @@ export default function ReportsPage() {
               </Card>
             ))}
           </div>
-
-          <Card className="border-none shadow-sm mt-4 bg-blue-50">
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">
-                All reports are digitally signed and verified by certified pathologists. You can download and share them
-                anytime.
-              </p>
-            </CardContent>
-          </Card>
         </div>
       </main>
 

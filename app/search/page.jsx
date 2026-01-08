@@ -11,6 +11,8 @@ import { Search, X, Clock, FileText, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import CartButtons from "@/components/CartButtons"
+import { transformTestData } from "@/lib/helper"
 
 export default function SearchPage() {
   const router = useRouter()
@@ -26,6 +28,23 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState({ tests: false, packages: false })
   const [mostSearched, setMostSearched] = useState([])
+
+  const [testCartItem, setTestCartItem] = useState(null)
+
+  const onAddToCart = async (data) => {
+    const transformedData = transformTestData(data)
+    setTest(transformedData);
+    setTestCartItem({
+      id: transformedData._id,
+      type: 'test',
+      name: transformedData.name,
+      price: transformedData.offer_price,
+      description: transformedData.description,
+      category: transformedData.category,
+      turnaroundTime: transformedData.turnaround_time,
+      sampleType: transformedData.sample_type
+    })
+  }
 
   // Fetch most searched on mount
   useEffect(() => {
@@ -195,18 +214,17 @@ export default function SearchPage() {
                   </h4>
                   <div className="space-y-3">
                     {searchResults.tests.map((test) => (
-                      <Link key={test.id} href={`/test?slug=${test.slug}`}>
+                      // <Link key={test.id} href={`/test?slug=${test.slug}`}>
+                      <div key={test.id}>
                         <CommonCard
+                          link={`/test?slug=${test.slug}`}
                           item={test}
                           alsoKnownAs={true}
                           showAddToCart={true}
-                          onAddToCart={async (item) => {
-                            // Your add to cart logic here (e.g., API call or local state update)
-                            console.log("Adding to cart:", item)
-                            await new Promise(res => setTimeout(res, 1000)) // simulate delay
-                          }}
+                          onAddToCart={onAddToCart}
                         />
-                      </Link>
+                      </div>
+                      // </Link>
                     ))}
                   </div>
 
@@ -285,6 +303,7 @@ export default function SearchPage() {
                               <Button size="sm" className="self-center">
                                 Add
                               </Button>
+                              {/* <CartButtons item={testCartItem} size="sm" text="Add To Cart" /> */}
                             </div>
                           </CardContent>
                         </Card>

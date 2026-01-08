@@ -1,7 +1,7 @@
 // components/CheckoutPopup.jsx
 'use client';
 
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/contexts/CartContext';
 import { useEffect, useState } from 'react';
 
 const CheckoutPopup = ({ onGoToCart, onCheckout, onClose }) => {
@@ -16,17 +16,17 @@ const CheckoutPopup = ({ onGoToCart, onCheckout, onClose }) => {
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/20 z-40 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/20 z-50 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Popup - Responsive Width */}
       <div 
         className={`
-          fixed bottom-0 left-0 right-0 z-50
+          fixed bottom-15 left-0 right-0 z-50
           transform transition-all duration-500 ease-out
           ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
         `}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-white rounded-t-3xl shadow-2xl mx-auto max-w-md">
           <div className="px-4 sm:px-6 py-5">

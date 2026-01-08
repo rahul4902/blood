@@ -1,9 +1,20 @@
+// components/AgDemo2.jsx
 "use client";
 
-import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef } from "react";
+import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, X, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader } from "lucide-react";
-import axios from "axios";
+import { 
+  Search, 
+  X, 
+  ChevronUp, 
+  ChevronDown, 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronsLeft, 
+  ChevronsRight, 
+  Loader 
+} from "lucide-react";
+import apiClient from "@/lib/api"; // ✅ Use apiClient instead of axios
 
 const SortIcon = ({ column, sortBy, sortOrder }) => {
   if (sortBy !== column) {
@@ -29,12 +40,22 @@ const AgDemo2 = forwardRef(({
   enableRowSelection = false,
   title = "Data Table",
   onAddNewRecord,
-  queryParamNames = { page: "page", pageSize: "pageSize", sortBy: "sortBy", sortOrder: "sortOrder", search: "search" },
+  queryParamNames = { 
+    page: "page", 
+    pageSize: "pageSize", 
+    sortBy: "sortBy", 
+    sortOrder: "sortOrder", 
+    search: "search" 
+  },
   extraParams = {},
-  responseAdapter = (json) => ({ rows: json?.data || json?.items || [], total: json?.total || 0 })
+  responseAdapter = (json) => ({ 
+    rows: json?.data || json?.items || [], 
+    total: json?.total || 0 
+  })
 }, ref) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(pagination.pageSize || 10);
   const [total, setTotal] = useState(0);
@@ -46,20 +67,37 @@ const AgDemo2 = forwardRef(({
   const isAllSelected = enableRowSelection && rows.length > 0 && rows.every(r => selectedRows.includes(r._id || r.id));
 
   // Stabilize defaults to avoid dependency churn
-  const defaultQPRef = React.useRef({ page: "page", pageSize: "pageSize", sortBy: "sortBy", sortOrder: "sortOrder", search: "search" })
-  const defaultExtraRef = React.useRef({})
-  const defaultAdapterRef = React.useRef((json) => ({ rows: json?.data || json?.items || [], total: json?.total || 0 }))
+  const defaultQPRef = useRef({ 
+    page: "page", 
+    pageSize: "pageSize", 
+    sortBy: "sortBy", 
+    sortOrder: "sortOrder", 
+    search: "search" 
+  });
+  const defaultExtraRef = useRef({});
+  const defaultAdapterRef = useRef((json) => ({ 
+    rows: json?.data || json?.items || [], 
+    total: json?.total || 0 
+  }));
 
-  const qp = queryParamNames || defaultQPRef.current
-  const extra = extraParams && Object.keys(extraParams).length > 0 ? extraParams : defaultExtraRef.current
-  const adapt = responseAdapter || defaultAdapterRef.current
-  const extraKey = React.useMemo(() => JSON.stringify(extra), [extra])
-  const qpKey = React.useMemo(() => JSON.stringify(qp), [qp])
+  const qp = queryParamNames || defaultQPRef.current;
+  const extra = extraParams && Object.keys(extraParams).length > 0 ? extraParams : defaultExtraRef.current;
+  const adapt = responseAdapter || defaultAdapterRef.current;
+  const extraKey = React.useMemo(() => JSON.stringify(extra), [extra]);
+  const qpKey = React.useMemo(() => JSON.stringify(qp), [qp]);
 
   const fetchData = useCallback(async () => {
-    if (!fetchDataUrl) return;
+    if (!fetchDataUrl) {
+      console.warn('⚠️ No fetchDataUrl provided to AgDemo2');
+      return;
+    }
+    
     setLoading(true);
+    setError(null);
+    
     try {
+      console.log('📡 Fetching data from:', fetchDataUrl);
+      
       const params = {
         [qp.page]: page,
         [qp.pageSize]: pageSize,
@@ -68,12 +106,30 @@ const AgDemo2 = forwardRef(({
         ...(sortBy && { [qp.sortOrder]: sortOrder }),
         ...extra
       };
-      const response = await axios.get(fetchDataUrl, { params });
+      
+      console.log('   Params:', params);
+      
+      // ✅ Use apiClient instead of axios - it has auth interceptors
+      const response = await apiClient.get(fetchDataUrl, { params });
+      
+      console.log('✅ Data fetched:', response.data);
+      
       const adapted = adapt(response.data);
+      
+      console.log('📊 Adapted data:', {
+        rows: adapted.rows?.length || 0,
+        total: adapted.total || 0
+      });
+      
       setRows(adapted.rows || []);
       setTotal(adapted.total || 0);
     } catch (err) {
-      console.error("Error fetching data:", err);
+      console.error("❌ Error fetching data:", err);
+      console.error("   URL:", fetchDataUrl);
+      console.error("   Status:", err.response?.status);
+      console.error("   Message:", err.response?.data?.message || err.message);
+      
+      setError(err.response?.data?.message || err.message || "Failed to fetch data");
       setRows([]);
       setTotal(0);
     } finally {
@@ -112,7 +168,11 @@ const AgDemo2 = forwardRef(({
     }
   };
 
-  const refresh = useCallback(() => { fetchData(); }, [fetchData]);
+  const refresh = useCallback(() => { 
+    console.log('🔄 Manual refresh triggered');
+    fetchData(); 
+  }, [fetchData]);
+  
   useImperativeHandle(ref, () => ({ refresh }));
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -120,12 +180,16 @@ const AgDemo2 = forwardRef(({
   return (
     <div className="w-full">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+        {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
             <div className="flex items-center gap-2">
               {onAddNewRecord && (
-                <Button onClick={onAddNewRecord} className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button 
+                  onClick={onAddNewRecord} 
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                >
                   <span className="mr-2">+</span>
                   Add New
                 </Button>
@@ -134,6 +198,7 @@ const AgDemo2 = forwardRef(({
           </div>
         </div>
 
+        {/* Search */}
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -144,37 +209,61 @@ const AgDemo2 = forwardRef(({
                   placeholder="Search..."
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                  className="pl-9 pr-4 py-1 w-64 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="pl-9 pr-10 py-2 w-64 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
                 {search && (
-                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                  <button 
+                    onClick={() => setSearch("")} 
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
                     <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
+              {loading && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <Loader className="animate-spin w-4 h-4" />
+                  <span className="text-sm">Loading...</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-          {loading && (
-            <div className="flex items-center gap-2 p-3 text-gray-600 dark:text-gray-300">
-              <Loader className="animate-spin w-4 h-4" /> Loading...
-            </div>
-          )}
+        {/* Error Message */}
+        {error && (
+          <div className="mx-4 mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-800 dark:text-red-200">
+              <strong>Error:</strong> {error}
+            </p>
+          </div>
+        )}
 
+        {/* Table */}
+        <div className="overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <thead className="bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-white sticky top-0 z-10">
               <tr>
                 {enableRowSelection && (
-                  <th className="px-3 py-1 border-r border-gray-200 dark:border-gray-700 w-12">
-                    <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
+                  <th className="px-4 py-3 border-r border-gray-200 dark:border-gray-700 w-12">
+                    <input 
+                      type="checkbox" 
+                      checked={isAllSelected} 
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                    />
                   </th>
                 )}
                 {columns.map((col) => (
-                  <th key={col.field} className="px-3 py-1 text-left border-r border-gray-200 dark:border-gray-700">
+                  <th 
+                    key={col.field} 
+                    className="px-4 py-3 text-left border-r border-gray-200 dark:border-gray-700 font-semibold"
+                  >
                     {col.sortable ? (
-                      <button onClick={() => handleSort(col.field)} className="flex items-center gap-1 font-semibold hover:text-blue-600 dark:hover:text-blue-400">
+                      <button 
+                        onClick={() => handleSort(col.field)} 
+                        className="flex items-center gap-1 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                      >
                         {col.header}
                         <SortIcon column={col.field} sortBy={sortBy} sortOrder={sortOrder} />
                       </button>
@@ -186,16 +275,16 @@ const AgDemo2 = forwardRef(({
               </tr>
             </thead>
             <tbody>
-              {loading
+              {loading && rows.length === 0
                 ? Array.from({ length: pageSize }).map((_, i) => (
                     <tr key={i} className="border-b border-gray-200 dark:border-gray-700">
                       {enableRowSelection && (
-                        <td className="px-3 py-1 border-r border-gray-200 dark:border-gray-700">
+                        <td className="px-4 py-3 border-r border-gray-200 dark:border-gray-700">
                           <div className="h-4 w-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
                         </td>
                       )}
                       {columns.map((_, j) => (
-                        <td key={j} className="px-3 py-1 border-r border-gray-200 dark:border-gray-700">
+                        <td key={j} className="px-4 py-3 border-r border-gray-200 dark:border-gray-700">
                           <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
                         </td>
                       ))}
@@ -206,14 +295,31 @@ const AgDemo2 = forwardRef(({
                     const rowId = row._id || row.id;
                     const checked = selectedRows.includes(rowId);
                     return (
-                      <tr key={rowId} className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 ${checked ? "bg-blue-50 dark:bg-blue-900/30" : ""}`} onClick={() => onRowClick?.(row)}>
+                      <tr 
+                        key={rowId} 
+                        className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
+                          checked ? "bg-orange-50 dark:bg-orange-900/20" : ""
+                        }`} 
+                        onClick={() => onRowClick?.(row)}
+                      >
                         {enableRowSelection && (
-                          <td className="px-3 py-1 border-r border-gray-200 dark:border-gray-700" onClick={(e) => e.stopPropagation()}>
-                            <input type="checkbox" checked={checked} onChange={(e) => handleSelectRow(rowId, e)} />
+                          <td 
+                            className="px-4 py-3 border-r border-gray-200 dark:border-gray-700" 
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input 
+                              type="checkbox" 
+                              checked={checked} 
+                              onChange={(e) => handleSelectRow(rowId, e)}
+                              className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            />
                           </td>
                         )}
                         {columns.map((col) => (
-                          <td key={col.field} className="px-3 py-1 border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white">
+                          <td 
+                            key={col.field} 
+                            className="px-4 py-3 border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white"
+                          >
                             {col.render ? col.render(row) : (row[col.field] ?? "N/A")}
                           </td>
                         ))}
@@ -222,8 +328,11 @@ const AgDemo2 = forwardRef(({
                   })
                 : (
                   <tr>
-                    <td colSpan={columns.length + (enableRowSelection ? 1 : 0)} className="p-4 text-center text-gray-900 dark:text-white">
-                      No data available
+                    <td 
+                      colSpan={columns.length + (enableRowSelection ? 1 : 0)} 
+                      className="p-8 text-center text-gray-500 dark:text-gray-400"
+                    >
+                      {error ? "Failed to load data" : "No data available"}
                     </td>
                   </tr>
                 )}
@@ -231,23 +340,46 @@ const AgDemo2 = forwardRef(({
           </table>
         </div>
 
+        {/* Pagination */}
         <div className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600 dark:text-gray-300">
               Showing {Math.min((page - 1) * pageSize + 1, total)} to {Math.min(page * pageSize, total)} of {total}
             </span>
             <div className="flex items-center gap-2">
-              <button onClick={() => setPage(1)} disabled={page === 1 || loading} className="p-1 rounded border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white hover:bg-blue-500 hover:text-white disabled:opacity-50">
+              <button 
+                onClick={() => setPage(1)} 
+                disabled={page === 1 || loading} 
+                className="p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-orange-500 hover:text-white hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="First page"
+              >
                 <ChevronsLeft size={16} />
               </button>
-              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1 || loading} className="p-1 rounded border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white hover:bg-blue-500 hover:text-white disabled:opacity-50">
+              <button 
+                onClick={() => setPage(Math.max(1, page - 1))} 
+                disabled={page === 1 || loading} 
+                className="p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-orange-500 hover:text-white hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Previous page"
+              >
                 <ChevronLeft size={16} />
               </button>
-              <span className="text-sm text-gray-900 dark:text-white">Page {page} of {totalPages}</span>
-              <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages || loading} className="p-1 rounded border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white hover:bg-blue-500 hover:text-white disabled:opacity-50">
+              <span className="text-sm text-gray-900 dark:text-white px-2">
+                Page {page} of {totalPages}
+              </span>
+              <button 
+                onClick={() => setPage(Math.min(totalPages, page + 1))} 
+                disabled={page >= totalPages || loading} 
+                className="p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-orange-500 hover:text-white hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Next page"
+              >
                 <ChevronRight size={16} />
               </button>
-              <button onClick={() => setPage(totalPages)} disabled={page === totalPages || loading} className="p-1 rounded border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white hover:bg-blue-500 hover:text-white disabled:opacity-50">
+              <button 
+                onClick={() => setPage(totalPages)} 
+                disabled={page === totalPages || loading} 
+                className="p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-orange-500 hover:text-white hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Last page"
+              >
                 <ChevronsRight size={16} />
               </button>
             </div>

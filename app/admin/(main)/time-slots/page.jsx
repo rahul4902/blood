@@ -83,7 +83,7 @@ export default function TimeSlots() {
   // Global Settings State
   const [globalSettings, setGlobalSettings] = useState({
     defaultSlotDuration: 30,
-    maxOrdersPerSlot: 5,
+    maxBookingsPerSlot: 5,
     advanceBookingDays: 30,
     bufferBetweenSlots: 0,
   });
@@ -100,7 +100,7 @@ export default function TimeSlots() {
           startTime: "09:00",
           endTime: "17:00",
           slotDuration: 30,
-          maxOrdersPerSlot: 5,
+          maxBookingsPerSlot: 5,
         },
       ],
     }))
@@ -181,7 +181,7 @@ export default function TimeSlots() {
 
         slots.push({
           time: timeString,
-          maxOrders: range.maxOrdersPerSlot,
+          maxBookings: range.maxBookingsPerSlot,
           duration: duration,
         });
 
@@ -261,7 +261,7 @@ export default function TimeSlots() {
                 startTime: "09:00",
                 endTime: "17:00",
                 slotDuration: globalSettings.defaultSlotDuration,
-                maxOrdersPerSlot: globalSettings.maxOrdersPerSlot,
+                maxBookingsPerSlot: globalSettings.maxBookingsPerSlot,
               },
             ],
           };
@@ -554,17 +554,17 @@ export default function TimeSlots() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="maxOrdersPerSlot">Max Orders Per Slot</Label>
+                  <Label htmlFor="maxBookingsPerSlot">Max Bookings Per Slot</Label>
                   <Input
-                    id="maxOrdersPerSlot"
+                    id="maxBookingsPerSlot"
                     type="number"
                     min="1"
                     max="100"
-                    value={globalSettings.maxOrdersPerSlot}
+                    value={globalSettings.maxBookingsPerSlot}
                     onChange={(e) =>
                       setGlobalSettings((prev) => ({
                         ...prev,
-                        maxOrdersPerSlot: parseInt(e.target.value) || 1,
+                        maxBookingsPerSlot: parseInt(e.target.value) || 1,
                       }))
                     }
                   />
@@ -724,16 +724,16 @@ export default function TimeSlots() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label className="text-xs md:text-sm">Max Orders</Label>
+                          <Label className="text-xs md:text-sm">Max Bookings</Label>
                           <Input
                             type="number"
                             min="1"
-                            value={range.maxOrdersPerSlot}
+                            value={range.maxBookingsPerSlot}
                             onChange={(e) =>
                               updateTimeRange(
                                 day.dayId,
                                 range.id,
-                                "maxOrdersPerSlot",
+                                "maxBookingsPerSlot",
                                 parseInt(e.target.value) || 1
                               )
                             }

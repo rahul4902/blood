@@ -11,9 +11,9 @@ export default function NotificationsPage() {
   const notifications = [
     {
       id: 1,
-      type: "order",
-      title: "Order Confirmed",
-      message: "Your order #12345 has been confirmed and will be processed soon.",
+      type: "booking",
+      title: "Booking Confirmed",
+      message: "Your booking #12345 has been confirmed and will be processed soon.",
       time: "2 hours ago",
       read: false,
     },
@@ -37,7 +37,7 @@ export default function NotificationsPage() {
 
   const getIcon = (type) => {
     switch (type) {
-      case "order":
+      case "booking":
         return <Package className="w-6 h-6 text-blue-600" />
       case "report":
         return <FileText className="w-6 h-6 text-green-600" />
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
 
   const getIconBg = (type) => {
     switch (type) {
-      case "order":
+      case "booking":
         return "bg-gradient-to-br from-blue-100 to-blue-200"
       case "report":
         return "bg-gradient-to-br from-green-100 to-green-200"

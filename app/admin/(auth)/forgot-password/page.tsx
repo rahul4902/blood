@@ -59,7 +59,7 @@ export default function AdminForgotPasswordPage() {
               <Button onClick={() => setIsSuccess(false)} variant="outline" className="w-full border-gray-300">
                 Try Different Email
               </Button>
-              <Link href="/admin/auth/login">
+              <Link href="/admin/login">
                 <Button className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Admin Login
@@ -141,7 +141,7 @@ export default function AdminForgotPasswordPage() {
 
         <div className="text-center">
           <Link
-            href="/admin/auth/login"
+            href="/admin/login"
             className="inline-flex items-center text-sm text-orange-600 hover:text-orange-500"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

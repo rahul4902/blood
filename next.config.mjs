@@ -16,6 +16,7 @@ import TerserPlugin from "terser-webpack-plugin";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   darkMode: 'class',
+  trailingSlash: true,
   eslint: {
     ignoreDuringBuilds: true,
   },

@@ -57,12 +57,12 @@ const statsData = [
 ]
 
 const revenueData = [
-  { month: "Jan", revenue: 45000, orders: 120 },
-  { month: "Feb", revenue: 52000, orders: 145 },
-  { month: "Mar", revenue: 48000, orders: 132 },
-  { month: "Apr", revenue: 61000, orders: 168 },
-  { month: "May", revenue: 55000, orders: 152 },
-  { month: "Jun", revenue: 67000, orders: 189 },
+  { month: "Jan", revenue: 45000, bookings: 120 },
+  { month: "Feb", revenue: 52000, bookings: 145 },
+  { month: "Mar", revenue: 48000, bookings: 132 },
+  { month: "Apr", revenue: 61000, bookings: 168 },
+  { month: "May", revenue: 55000, bookings: 152 },
+  { month: "Jun", revenue: 67000, bookings: 189 },
 ]
 
 const testPopularityData = [
@@ -73,7 +73,7 @@ const testPopularityData = [
   { name: "Others", value: 5, color: "#8B5CF6" },
 ]
 
-const recentOrders = [
+const recentBookings = [
   {
     id: "HLP001",
     customer: "Rajesh Kumar",
@@ -221,11 +221,11 @@ export default function AdminDashboard() {
                 <Tooltip
                   formatter={(value, name) => [
                     name === "revenue" ? `₹${value}` : value,
-                    name === "revenue" ? "Revenue" : "Orders",
+                    name === "revenue" ? "Revenue" : "Bookings",
                   ]}
                 />
                 <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} />
-                <Line type="monotone" dataKey="orders" stroke="#10B981" strokeWidth={2} />
+                <Line type="monotone" dataKey="bookings" stroke="#10B981" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -259,12 +259,12 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Recent Orders and Pending Tasks */}
+      {/* Recent Bookings and Pending Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
+        {/* Recent Bookings */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Recent Orders</CardTitle>
+            <CardTitle>Recent Bookings</CardTitle>
             <Button variant="outline" size="sm">
               <Eye className="w-4 h-4 mr-2" />
               View All
@@ -272,23 +272,23 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentOrders.map((order) => (
+              {recentBookings.map((booking) => (
                 <div
-                  key={order.id}
+                  key={booking.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium">{order.customer}</span>
-                      <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
+                      <span className="font-medium">{booking.customer}</span>
+                      <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
                     </div>
-                    <p className="text-sm text-gray-600">{order.test}</p>
+                    <p className="text-sm text-gray-600">{booking.test}</p>
                     <p className="text-xs text-gray-500">
-                      Order ID: {order.id} • {order.date}
+                      Booking ID: {booking.id} • {booking.date}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-green-600">₹{order.amount}</p>
+                    <p className="font-semibold text-green-600">₹{booking.amount}</p>
                   </div>
                 </div>
               ))}

@@ -31,7 +31,7 @@ export default function ReportDetailsPage({ searchParams }) {
           <div className="mb-4">
             <h1 className="text-xl font-bold mb-2">Complete Health Checkup</h1>
             <div className="flex items-center justify-between text-sm">
-              <p className="text-muted-foreground">Order #12345 • 15 Jan 2025</p>
+              <p className="text-muted-foreground">Booking #12345 • 15 Jan 2025</p>
               <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded">Normal</span>
             </div>
           </div>

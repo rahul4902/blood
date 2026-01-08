@@ -3,8 +3,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, ShoppingCart, Calendar, MessageCircle, User } from "lucide-react"
-import { useCart } from "@/context/CartContext"
+import { Home, ShoppingCart, Calendar, MessageCircle, User, SquareChartGantt } from "lucide-react"
+import { useCart } from "@/contexts/CartContext"
 
 export default function MobileNav() {
   const pathname = usePathname()
@@ -13,8 +13,8 @@ export default function MobileNav() {
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
     { href: "/cart", icon: ShoppingCart, label: "Cart", badge: itemCount },
-    { href: "/home-visit", icon: Calendar, label: "Visit" },
-    { href: "/chat", icon: MessageCircle, label: "Chat" },
+    { href: "/bookings", icon: Calendar, label: "Bookings" },
+    { href: "/reports", icon: SquareChartGantt, label: "Reports" },
     { href: "/profile", icon: User, label: "Profile" },
   ]
 
